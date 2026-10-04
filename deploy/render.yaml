@@ -1,0 +1,33 @@
+# Prepared configuration only. Creating this service incurs hosting charges.
+# Review docs/deployment.md and approve the account/cost before importing.
+services:
+  - type: web
+    name: sidecar-qloo
+    runtime: docker
+    repo: https://github.com/popcorntoocold/sidecar
+    branch: main
+    plan: 0.5c-512mb
+    region: ohio
+    numInstances: 1
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: off
+    healthCheckPath: /api/status
+    maxShutdownDelaySeconds: 120
+    disk:
+      name: sidecar-budget
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: QLOO_API_KEY
+        sync: false
+      - key: QLOO_HOURLY_WORKFLOW_LIMIT
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.4-mini-2026-03-17
+      - key: OPENAI_TEST_BUDGET_USD
+        sync: false
+      - key: OPENAI_BUDGET_FILE
+        value: /var/data/openai-budget.json

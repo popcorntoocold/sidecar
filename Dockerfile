@@ -15,6 +15,7 @@ RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
 COPY --from=build /app/shared ./shared
+RUN install -d -o node -g node /var/data
 USER node
 EXPOSE 4310
 CMD ["node", "--import", "tsx", "server/index.ts"]

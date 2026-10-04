@@ -123,4 +123,4 @@ Current dependencies: the Qloo application was submitted with approval and issua
 
 Ruflo tooling was searched in the available tool catalog. Neither Ruflo tools nor ToolSearch are exposed in this session. No Ruflo actions have been performed.
 
-The local application and Qloo key application are complete. No live provider integration, repository publication, deployment, owner feedback or contest submission is represented as complete.
+The local application and Qloo key application are complete. The public source repository has been published with an MIT license. No live provider integration, deployment, owner feedback or contest submission is represented as complete.

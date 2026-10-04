@@ -39,7 +39,7 @@ Record role, voluntary feedback, task outcome, changes requested, and whether pe
 - A clean Docker build and local production startup succeeded. The production API returned preview mode with four fictional candidates and zero exclusions.
 - The independent review found no Critical issues, three Important provider-adapter issues, and two Minor proposal issues. All five were addressed. Regression tests reproduced the provider issues before fixes and passed afterward.
 - The credential check exited explicitly with missing QLOO_API_KEY. No live Qloo or OpenAI request has been verified.
-- Public hosting, repository publication, real owner feedback, measured baseline comparison and final submission remain incomplete.
+- Public hosting, real owner feedback, measured baseline comparison and final submission remain incomplete.
 - The Qloo API key request was submitted with explicit user approval and the form confirmed receipt. Issuance remains pending; the confirmation estimates a few business days.
 
 - Dependency resolution moved to pinned pnpm 12.9.1 with undici 8.10.2 and brace-expansion 5.0.12 overrides. The project pnpm audit reports no known vulnerabilities. This is the package advisory result, not a claim of complete application security.
@@ -56,3 +56,7 @@ Provider discovery and analysis reuse identical requests for at most 30 minutes 
 Latest continuation verification: all 64 tests also passed in the Linux Docker build, followed by TypeScript and Vite compilation. The non-root production container started on loopback, served four labeled preview candidates and reported both providers unconfigured. The installed harness CLI started successfully with `--help`; no provider request was sent. Mobile inspection reported 375 CSS pixels for both viewport and content width. The temporary verification container was stopped and removed. Credential-pattern scans of tracked/untracked deliverable files and Git history found no matches; this is a focused scan, not a comprehensive security audit.
 
 A subsequent HTTP integration regression reproduced an early per-visitor limit during resolve → research → paired comparison → exclusion/revision. The per-visitor ceiling now permits 30 workflow reservations, capped by the unchanged global allowance. The full 65-test suite passes after the fix, including the server-owned revision chain and exclusion check. Providers in this integration test are explicit fixtures; it is not a live integration result.
+
+## Public repository
+
+Published October 4 at https://github.com/popcorntoocold/sidecar. GitHub reports PUBLIC visibility, default branch main, and MIT license detection. An unauthenticated web read also confirmed access. GitHub Actions now runs the container build, test suite, TypeScript compiler and a provider-free production smoke check. Hosting has not been activated; `docs/deployment.md` and `deploy/render.yaml` describe the proposed paid configuration for approval.

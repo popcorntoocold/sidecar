@@ -1,6 +1,6 @@
 # Sidecar submission working draft
 
-This is a preparation document, not a submitted entry. Rewrite claims after live integration, deployment and evaluation. Public app and repository URLs do not exist yet.
+This is a preparation document, not a submitted entry. Rewrite claims after live integration, deployment and evaluation. Public source: https://github.com/popcorntoocold/sidecar (MIT). The public app URL does not exist yet.
 
 ## Name and pitch
 
@@ -47,7 +47,7 @@ React/TypeScript interface, Node server, typed input validation, server-owned to
 - [ ] Model configured and live tool decisions and proposal verified.
 - [ ] Live baseline comparison and owner feedback completed.
 - [ ] Public demo deployed and tested anonymously.
-- [ ] Repository published with license detected.
+- [x] Repository published with MIT license detected.
 - [ ] Final screenshots and honest description added to Devpost.
 - [ ] User reviews and submits the final entry.
 
