@@ -40,12 +40,15 @@ export function runJsonProcess(args:string[],input:unknown,options:Options={}):P
     child.stdin.end(serialized);
   });
 }
+export function qlooEnvironment(apiKey:string):NodeJS.ProcessEnv{
+  const env:NodeJS.ProcessEnv={QLOO_API_KEY:apiKey,QLOO_BASE_URL:'https://hackathon.api.qloo.com',QLOO_TRUSTED_BASE_URL:'https://hackathon.api.qloo.com'};
+  for(const key of ['PATH','SystemRoot','SYSTEMROOT','TEMP','TMP','HOME','USERPROFILE'])if(process.env[key])env[key]=process.env[key];
+  return env;
+}
 export async function executeQloo(operation:string,input:unknown,signal:AbortSignal,config:{apiKey?:string}={}):Promise<unknown>{
   if(!allowed.has(operation))throw new AppError('INVALID_TOOL','This operation is not allowed.',400);
   const apiKey=config.apiKey??process.env.QLOO_API_KEY;
   if(!apiKey)throw new AppError('QLOO_NOT_CONFIGURED','Live research needs the event-issued Qloo API key. You can explore the labeled example meanwhile.',503);
   const harnessBin=join(dirname(fileURLToPath(import.meta.resolve('@qloo/qloo-harness'))),'bin.js');
-  const env:NodeJS.ProcessEnv={QLOO_API_KEY:apiKey};
-  for(const key of ['PATH','SystemRoot','SYSTEMROOT','TEMP','TMP','HOME','USERPROFILE'])if(process.env[key])env[key]=process.env[key];
-  return runJsonProcess([harnessBin,'exec',operation],input,{signal,env});
+  return runJsonProcess([harnessBin,'exec',operation],input,{signal,env:qlooEnvironment(apiKey)});
 }

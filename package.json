@@ -7,15 +7,12 @@
     "node": ">=22.19.0"
   },
   "scripts": {
-    "dev": "tsx server/index.ts",
+    "dev": "node --env-file-if-exists=.env --import tsx server/index.ts",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
-    "start": "tsx server/index.ts",
-    "check:live": "tsx scripts/live-check.ts"
-  },
-  "overrides": {
-    "undici": "8.10.2",
-    "brace-expansion": "5.0.12"
+    "start": "node --env-file-if-exists=.env --import tsx server/index.ts",
+    "check:live": "node --env-file-if-exists=.env --import tsx scripts/live-check.ts",
+    "evaluate": "node --import tsx scripts/evaluate.ts"
   },
   "dependencies": {
     "@fastify/rate-limit": "11.2.0",
@@ -24,9 +21,10 @@
     "@fontsource/newsreader": "5.3.0",
     "@qloo/qloo-harness": "0.1.26",
     "fastify": "5.12.5",
-    "lucide-react": "1.52.0",
+    "lucide-react": "1.51.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "tsx": "4.23.15",
     "zod": "4.6.5"
   },
   "devDependencies": {
@@ -34,9 +32,9 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.1",
-    "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.2",
     "vitest": "5.0.3"
-  }
+  },
+  "packageManager": "pnpm@12.9.1"
 }

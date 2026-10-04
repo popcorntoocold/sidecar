@@ -1,5 +1,11 @@
 import {it,expect} from 'vitest';
-import {executeQloo, runJsonProcess} from '../server/qloo/process';
+import {executeQloo, runJsonProcess, qlooEnvironment} from '../server/qloo/process';
+it('sends event credentials only to the fixed hackathon endpoint',()=>{
+  const env=qlooEnvironment('fixture-key');
+  expect(env.QLOO_BASE_URL).toBe('https://hackathon.api.qloo.com');
+  expect(env.QLOO_TRUSTED_BASE_URL).toBe(env.QLOO_BASE_URL);
+  expect(env.OPENAI_API_KEY).toBeUndefined();
+});
 it('rejects unsupported commands before launching', async () => {
   await expect(executeQloo('build',{},new AbortController().signal)).rejects.toMatchObject({code:'INVALID_TOOL'});
 });

@@ -1,5 +1,5 @@
 import {z} from 'zod';
-export const ReferenceSchema=z.object({id:z.string().min(1).max(150),name:z.string().trim().min(1).max(200),type:z.string().min(1).max(50)}).strict();
+export const ReferenceSchema=z.object({id:z.string().min(1).max(150),name:z.string().trim().min(1).max(200),type:z.string().min(1).max(50),subtitle:z.string().max(500).optional()}).strict();
 export const BriefSchema=z.object({
   city:z.string().trim().min(2).max(120),category:z.enum(['cafe','bookstore','venue','restaurant']),
   objective:z.string().trim().min(5).max(500),
@@ -9,7 +9,7 @@ export const BriefSchema=z.object({
 export type Reference=z.infer<typeof ReferenceSchema>;
 export type Brief=z.infer<typeof BriefSchema>;
 export type Resolution={status:'resolved'|'ambiguous'|'not_found';candidates:Reference[]};
-export type EvidenceRecord={id:string;source:'Qloo'|'Illustrative';operation:string;fetchedAt:string;request:Record<string,unknown>;entityIds:string[];metrics:Record<string,number>;details:unknown;limitations:string[]};
+export type EvidenceRecord={id:string;source:'Qloo'|'Illustrative';operation:string;fetchedAt:string;request:Record<string,unknown>;entityIds:string[];metrics:Record<string,number>;details:unknown;metadata?:Record<string,unknown>;limitations:string[]};
 export type Candidate={id:string;name:string;type:string;address:string;description:string;providerRank:number;affinity?:number;popularity?:number;evidenceIds:string[];explanation:unknown};
 export type AgentEvent={action:string;detail:string;status:'complete'|'warning';timestamp:string};
 export type ResearchResult={id:string;mode:'live'|'preview';brief:Brief;candidates:Candidate[];evidence:EvidenceRecord[];warnings:string[];events:AgentEvent[];durationMs:number};

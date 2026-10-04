@@ -15,6 +15,8 @@ export async function runResearch(brief:Brief,tag:string,deps:{provider:Research
   const event=(action:string,detail:string,status:'complete'|'warning'='complete')=>events.push({action,detail,status,timestamp:new Date().toISOString()});
   const discovery=await deps.provider.discover(brief,tag,signal);checkCancelled(signal);
   const candidates=discovery.candidates.slice(0,5),evidence=[discovery.evidence];
+  const addProviderWarnings=(record:EvidenceRecord)=>{const values=record.metadata?.warnings;if(Array.isArray(values))for(const item of values)if(typeof item==='string'&&!warnings.includes(item))warnings.push(item);};
+  addProviderWarnings(discovery.evidence);
   event('Discover partners',`Qloo returned ${discovery.candidates.length} candidates for ${brief.city} and its surrounding area.`);
   let used=1;const counts=new Map<string,number>();
   while(candidates.length&&used<8){
@@ -29,6 +31,7 @@ export async function runResearch(brief:Brief,tag:string,deps:{provider:Research
       const operation=action==='compare'?'compare_audiences':'rank';
       const record=await deps.provider.analyze(operation,brief,candidates,signal);checkCancelled(signal);
       evidence.push(record);
+      addProviderWarnings(record);
       // Analysis supplements discovery. Unverified cross-request score arithmetic never changes ordering.
       candidates.forEach(c=>c.evidenceIds=[...new Set([...c.evidenceIds,record.id])]);
       event(action==='compare'?'Compare cultural audiences':'Evaluate shortlist','Additional Qloo evidence is available in the research record. Discovery order is preserved.');

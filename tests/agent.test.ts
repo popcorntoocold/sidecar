@@ -30,3 +30,9 @@ it('cancels before calling providers',async()=>{
   const ac=new AbortController();ac.abort();
   await expect(runResearch(brief,'tag',{provider:provider(),model:{next:async()=>({action:'finish'})}},ac.signal)).rejects.toMatchObject({code:'CANCELLED'});
 });
+
+it('surfaces provider limitations alongside the shortlist',async()=>{
+  const p={discover:async()=>({candidates:[candidate],evidence:{...evidence,metadata:{warnings:['Nearby matching used']}}}),analyze:async()=>evidence};
+  const result=await runResearch(brief,'tag',{provider:p,model:{next:async()=>({action:'finish'})}},new AbortController().signal);
+  expect(result.warnings).toContain('Nearby matching used');
+});
