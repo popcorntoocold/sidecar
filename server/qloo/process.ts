@@ -1,5 +1,5 @@
 import {spawn} from 'node:child_process';
-import {createRequire} from 'node:module';
+import {fileURLToPath} from 'node:url';
 import {dirname,join} from 'node:path';
 import {AppError} from '../../shared/contracts';
 const allowed=new Set(['describe','recommend','rank','compare_audiences','find_tags']);
@@ -44,8 +44,7 @@ export async function executeQloo(operation:string,input:unknown,signal:AbortSig
   if(!allowed.has(operation))throw new AppError('INVALID_TOOL','This operation is not allowed.',400);
   const apiKey=config.apiKey??process.env.QLOO_API_KEY;
   if(!apiKey)throw new AppError('QLOO_NOT_CONFIGURED','Live research needs the event-issued Qloo API key. You can explore the labeled example meanwhile.',503);
-  const require=createRequire(import.meta.url);
-  const harnessBin=join(dirname(require.resolve('@qloo/qloo-harness')),'bin.js');
+  const harnessBin=join(dirname(fileURLToPath(import.meta.resolve('@qloo/qloo-harness'))),'bin.js');
   const env:NodeJS.ProcessEnv={QLOO_API_KEY:apiKey};
   for(const key of ['PATH','SystemRoot','SYSTEMROOT','TEMP','TMP','HOME','USERPROFILE'])if(process.env[key])env[key]=process.env[key];
   return runJsonProcess([harnessBin,'exec',operation],input,{signal,env});
