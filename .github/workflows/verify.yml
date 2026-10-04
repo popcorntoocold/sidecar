@@ -1,0 +1,41 @@
+name: Verify Sidecar
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', '**.md', LICENSE]
+  pull_request:
+    paths-ignore: ['docs/**', '**.md', LICENSE]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build, typecheck and test in the production container
+        run: docker build -t sidecar-ci .
+      - name: Verify production startup without provider credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name sidecar-ci -p 127.0.0.1:4311:4310 -e QLOO_HOURLY_WORKFLOW_LIMIT=30 sidecar-ci
+          trap 'docker logs sidecar-ci; docker rm -f sidecar-ci' EXIT
+          curl --fail --retry 10 --retry-connrefused --retry-delay 2 http://127.0.0.1:4311/api/status > /tmp/sidecar-status.json
+          curl --fail http://127.0.0.1:4311/api/preview > /tmp/sidecar-preview.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/sidecar-status.json') as source:
+              assert json.load(source) == {'qlooConfigured': False, 'modelConfigured': False, 'liveReady': False}
+          with open('/tmp/sidecar-preview.json') as source:
+              run = json.load(source)
+          assert run['mode'] == 'preview' and len(run['candidates']) == 4
+          assert all(record['source'] == 'Illustrative' for record in run['evidence'])
+          print('Production preview and credential separation verified.')
+          PY
+          docker exec sidecar-ci node node_modules/@qloo/qloo-harness/dist/bin.js --version

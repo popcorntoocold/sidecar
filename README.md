@@ -2,7 +2,11 @@
 
 Find your next neighborhood collaboration using cultural evidence. Sidecar is a Qloo Agentic Hackathon project for independent bookstores and cultural businesses researching local partners.
 
-**Current state:** local application implemented. The complete illustrative walkthrough is usable. Live Qloo and model verification, public hosting, public repository publication, owner research, and competition submission are not complete. The example uses fictional businesses and never substitutes for live provider results.
+**Current state:** local application implemented. The complete illustrative walkthrough is usable. Live Qloo and model verification, public hosting, owner research, and competition submission are not complete. The example uses fictional businesses and never substitutes for live provider results.
+
+![Sidecar illustrative walkthrough](docs/assets/preview.jpg)
+
+*Local example with fictional businesses. Live integration is pending credentials.*
 
 ## Try it locally
 
@@ -15,7 +19,7 @@ pnpm run dev
 
 Open http://127.0.0.1:4310 and choose **Explore a complete example**. Inspect evidence, compare partners, exclude one, create a proposal, edit the proposal, and export the brief. Starting your own brief invokes the live flow and requires credentials.
 
-On this Windows workspace, the compatible bundled Node executable is `C:\Users\haora\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe`. The server can be started with that executable followed by `--env-file-if-exists=.env --import tsx server/index.ts`.
+On Windows, confirm `node --version` meets the requirement. You can start the server directly with `node --env-file-if-exists=.env --import tsx server/index.ts` when package-manager shell wrappers are unavailable.
 
 ## Configure live research
 
@@ -71,6 +75,8 @@ docker run --rm -p 127.0.0.1:4311:4310 -e QLOO_HOURLY_WORKFLOW_LIMIT=30 sidecar-
 ```
 
 That command starts only a local preview without keys. A public URL and verified live-provider behavior are still required for the competition.
+
+The GitHub verification workflow builds the container, runs its tests and compiler, then checks the production preview with no provider keys. It never uses paid API credentials.
 
 ## Project documents
 
