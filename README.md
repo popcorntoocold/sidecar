@@ -1,5 +1,7 @@
 # Sidecar
 
+[![Verify Sidecar](https://github.com/popcorntoocold/sidecar/actions/workflows/verify.yml/badge.svg)](https://github.com/popcorntoocold/sidecar/actions/workflows/verify.yml)
+
 Find your next neighborhood collaboration using cultural evidence. Sidecar is a Qloo Agentic Hackathon project for independent bookstores and cultural businesses researching local partners.
 
 **Current state:** local application implemented. The complete illustrative walkthrough is usable. Live Qloo and model verification, public hosting, owner research, and competition submission are not complete. The example uses fictional businesses and never substitutes for live provider results.
@@ -84,6 +86,8 @@ The GitHub verification workflow builds the container, runs its tests and compil
 - [Approved implementation plan](docs/superpowers/plans/2026-10-04-sidecar.md)
 - [Submission working draft](docs/submission.md)
 - [Evaluation status and owner feedback guide](docs/evaluation.md)
+- [Live validation protocol](docs/live-validation.md)
+- [Deployment configuration and cost review](docs/deployment.md)
 
 MIT-licensed original application code. Qloo, fonts, libraries and other dependencies retain their own licenses and service terms.
 

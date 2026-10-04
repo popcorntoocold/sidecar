@@ -60,3 +60,7 @@ A subsequent HTTP integration regression reproduced an early per-visitor limit d
 ## Public repository
 
 Published October 4 at https://github.com/popcorntoocold/sidecar. GitHub reports PUBLIC visibility, default branch main, and MIT license detection. An unauthenticated web read also confirmed access. GitHub Actions now runs the container build, test suite, TypeScript compiler and a provider-free production smoke check. Hosting has not been activated; `docs/deployment.md` and `deploy/render.yaml` describe the proposed paid configuration for approval.
+
+GitHub Actions run [37241292846](https://github.com/popcorntoocold/sidecar/actions/runs/37241292846), source commit `b776cd1`, passed 65 tests, TypeScript/Vite compilation, production preview/credential separation and harness CLI startup on a fresh GitHub runner. The preceding run found a readiness race in the smoke check; bounded retries now include connection resets during startup.
+
+An isolated local Docker volume test under a 512 MB / 0.5 CPU limit confirmed that the non-root container user can persist a simulated budget reservation, and that a replacement container reads it and refuses excess reservations. No API requests were made. The disposable test volume was removed. This verifies storage behavior, not live harness memory capacity or Render account provisioning.
