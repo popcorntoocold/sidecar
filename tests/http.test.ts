@@ -13,6 +13,11 @@ it('clearly separates preview from live status',async()=>{
   const res=await app.inject({method:'GET',url:'/api/preview'});
   expect(res.json().mode).toBe('preview');expect(res.json().evidence[0].source).toBe('Illustrative');
 });
+it('does not create a phantom exclusion from an empty query',async()=>{
+  const app=await createApp();apps.push(app);
+  const res=await app.inject({method:'GET',url:'/api/preview?exclude='});
+  expect(res.json().brief.rejectedIds).toEqual([]);
+});
 it('does not let a caller turn preview references into live evidence',async()=>{
   const app=await createApp();apps.push(app);
   const res=await app.inject({method:'POST',url:'/api/research',payload:{brief:createPreview().brief,categoryTag:'fixture'}});
