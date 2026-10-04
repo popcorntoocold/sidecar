@@ -2,6 +2,26 @@ import {it,expect} from 'vitest';
 import {QlooProvider,parseCandidates,parseResolution} from '../server/qloo/provider';
 const signal=new AbortController().signal;
 const brief={city:'Austin',category:'cafe' as const,objective:'A reading event',references:[{id:'ref',name:'Book',type:'book'}],rejectedIds:[]};
+it('reuses discovery for an exclusion or objective edit and invalidates it for changed signals',async()=>{
+  let calls=0;
+  const p=new QlooProvider(async(_op,input)=>{calls++;return {status:'ok',interpretation:{filter_location:input.filter_location},results:[{id:'one',name:'One'},{id:'two',name:'Two'}]};});
+  const initial=await p.discover(brief,'tag',signal);
+  const revised=await p.discover({...brief,businessName:'Private fixture name',objective:'A different event',rejectedIds:['one']},'tag',signal);
+  expect(calls).toBe(1);expect(revised.cacheHit).toBe(true);
+  expect(revised.candidates.map(c=>c.id)).toEqual(['two']);
+  expect(revised.evidence.id).toBe(initial.evidence.id);
+  expect(JSON.stringify(revised.evidence.request)).not.toContain('Private fixture name');
+  await p.discover({...brief,references:[{id:'changed',name:'Changed',type:'book'}]},'tag',signal);
+  expect(calls).toBe(2);
+});
+it('reuses unchanged analysis but refreshes it when the shortlist changes',async()=>{
+  let calls=0;const p=new QlooProvider(async()=>{calls++;return {status:'ok',results:[]};});
+  const candidates=parseCandidates({status:'ok',results:[{id:'one',name:'One'},{id:'two',name:'Two'}]},'discovery',[]);
+  const first=await p.analyze('rank',brief,candidates,signal);
+  const repeat=await p.analyze('rank',{...brief,objective:'A new event'},candidates,signal);
+  expect(calls).toBe(1);expect(repeat.id).toBe(first.id);
+  await p.analyze('rank',brief,candidates.slice(1),signal);expect(calls).toBe(2);
+});
 it('preserves distinguishing facts for same-name references',()=>{
   const result=parseResolution({status:'needs_input',results:[],resolution:{issues:[{candidates:[{id:'a',name:'The Thing',type:'movie',release_year:1982,description:'Antarctic research station'},{id:'b',name:'The Thing',type:'movie',release_year:2011,description:'A prequel'}]}]}});
   expect(result.candidates[0].subtitle).toContain('1982');expect(result.candidates[1].subtitle).toContain('2011');

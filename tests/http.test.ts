@@ -39,3 +39,9 @@ it('serves a printable proposal with illustrative provenance',async()=>{
   const response=await app.inject({method:'POST',url:'/api/proposal',payload:{runId:run.id,candidateId:run.candidates[0].id}});
   expect(response.statusCode).toBe(200);expect(response.json().mode).toBe('preview');expect(response.json().evidence[0].source).toBe('Illustrative');
 });
+it('refuses measured comparisons of a fictional walkthrough',async()=>{
+  const app=await createApp();apps.push(app);
+  const run=(await app.inject({method:'GET',url:'/api/preview'})).json();
+  const response=await app.inject({method:'POST',url:'/api/comparison',payload:{runId:run.id}});
+  expect(response.statusCode).toBe(400);expect(response.json().code).toBe('LIVE_RUN_REQUIRED');
+});

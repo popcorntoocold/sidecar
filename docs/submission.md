@@ -16,7 +16,7 @@ Independent businesses can have complementary audiences without an obvious conne
 
 Sidecar begins with a business's city, collaboration objective, and cultural references. Its proposed live workflow resolves the references with Qloo, discovers nearby partners, gathers cultural evidence, and drafts a collaboration brief. Owners can inspect sources, compare candidates, reject a partner and revise the shortlist.
 
-The local implementation already includes this interface and a separate, explicitly fictional walkthrough. The Qloo adapter and bounded planning loop are implemented but have not been exercised with event credentials.
+The local implementation already includes this interface and a separate, explicitly fictional walkthrough. The Qloo adapter and bounded planning loop are implemented but have not been exercised with event credentials. The paired LLM-only comparison, revision history, evidence reuse and persistent model test-budget guard are implemented and fixture-tested. No quality advantage is claimed from these offline tests.
 
 ## Qloo integration
 

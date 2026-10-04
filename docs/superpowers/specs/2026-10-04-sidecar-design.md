@@ -1,6 +1,6 @@
 # Sidecar project design
 
-Status: Product direction and written specification approved on October 4, 2026. No application has been implemented or deployed.
+Status: Product direction and written specification approved on October 4, 2026. The local application and offline checks are implemented. Live provider verification, public deployment and final submission remain pending. See docs/evaluation.md for current evidence.
 
 ## Objective and audience
 
@@ -119,8 +119,8 @@ Definition of a first functional milestone: a new user enters a brief, resolves 
 
 Target internal completion: October 27, leaving time for deployment or submission problems before October 30. This is a planning target, not a scheduled automation.
 
-Current dependencies: no Qloo credential is available in this session; model credentials and hosting need checking. The [official API request form](https://docs.google.com/forms/d/1G_udB8rJTlSwwCx9LF1vaftYI4Qf459ZXIKqLPElWc8/viewform) requests account details, a project idea, and acceptance of API rules. Credential values should be configured privately, not pasted into chat.
+Current dependencies: the Qloo application was submitted with approval and issuance is pending. The OpenAI model and $1 test ceiling are approved; the private credential still needs to be configured. Hosting remains to be configured. The [official API request form](https://docs.google.com/forms/d/1G_udB8rJTlSwwCx9LF1vaftYI4Qf459ZXIKqLPElWc8/viewform) requests account details, a project idea, and acceptance of API rules. Credential values should be configured privately, not pasted into chat.
 
 Ruflo tooling was searched in the available tool catalog. Neither Ruflo tools nor ToolSearch are exposed in this session. No Ruflo actions have been performed.
 
-No app, repository publication, external messages, API application, deployment, or contest submission is represented as complete.
+The local application and Qloo key application are complete. No live provider integration, repository publication, deployment, owner feedback or contest submission is represented as complete.

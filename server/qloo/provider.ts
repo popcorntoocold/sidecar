@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
 import {AppError,type Brief,type Candidate,type EvidenceRecord,type Resolution,type Reference} from '../../shared/contracts';
 import {executeQloo} from './process';
+import {ExpiringStore} from '../limits';
 const Envelope=z.object({status:z.enum(['ok','empty','needs_input']),results:z.union([z.array(z.unknown()),z.record(z.string(),z.unknown())]),interpretation:z.record(z.string(),z.unknown()).optional(),resolution:z.unknown().optional()}).passthrough();
 const Entity=z.object({entity_id:z.string().optional(),id:z.string().optional(),name:z.string(),type:z.string().optional(),affinity:z.number().finite().optional(),popularity:z.number().finite().optional(),properties:z.record(z.string(),z.unknown()).optional(),explainability:z.unknown().optional()}).passthrough();
 export type QlooExecute=(operation:string,input:Record<string,unknown>,signal:AbortSignal)=>Promise<unknown>;
@@ -52,6 +53,8 @@ export function parseCandidates(raw:unknown,evidenceId:string,rejectedIds:string
   });
 }
 export class QlooProvider{
+  private discoveries=new ExpiringStore<{data:z.infer<typeof Envelope>;evidence:EvidenceRecord}>();
+  private analyses=new ExpiringStore<EvidenceRecord>();
   constructor(private execute:QlooExecute=executeQloo){}
   async resolve(query:string,type:string|undefined,signal:AbortSignal){return parseResolution(await this.execute('describe',{entity:query,...type?{type}:{}},signal));}
   async tags(category:string,signal:AbortSignal):Promise<{id:string;name:string}[]>{
@@ -61,17 +64,24 @@ export class QlooProvider{
   }
   async discover(brief:Brief,categoryTag:string,signal:AbortSignal){
     const request={target_type:'place',signals:brief.references.map(x=>x.id),filter_location:brief.city,include_tags:[categoryTag],explain:true,limit:10};
+    if(signal.aborted)throw new AppError('CANCELLED','Research was cancelled.',499);
+    const key=JSON.stringify(request),cached=this.discoveries.get(key);
+    if(cached)return {candidates:parseCandidates(cached.data,cached.evidence.id,brief.rejectedIds),evidence:structuredClone(cached.evidence),cacheHit:true};
     const data=envelope(await this.execute('recommend',request,signal));
     if(data.interpretation?.filter_location!==brief.city)throw new AppError('LOCATION_MISMATCH','The provider did not preserve the requested area. No results were used.');
     const evidence:EvidenceRecord={id:randomUUID(),source:'Qloo',operation:'recommend',fetchedAt:new Date().toISOString(),request,entityIds:[],metrics:{},details:data.results,metadata:metadata(data),limitations:['Location includes the provider’s surrounding-area matching; strict city boundaries are not asserted.','Affinity describes aggregate taste alignment, not actual customer overlap or sales.',...warnings(data)]};
-    const candidates=parseCandidates(data,evidence.id,brief.rejectedIds);evidence.entityIds=candidates.map(x=>x.id);
-    return {candidates,evidence};
+    const candidates=parseCandidates(data,evidence.id,[]);evidence.entityIds=candidates.map(x=>x.id);
+    this.discoveries.set(key,{data:structuredClone(data),evidence:structuredClone(evidence)});
+    return {candidates:candidates.filter(c=>!brief.rejectedIds.includes(c.id)),evidence,cacheHit:false};
   }
   async analyze(operation:'rank'|'compare_audiences',brief:Brief,candidates:Candidate[],signal:AbortSignal):Promise<EvidenceRecord>{
     const request=operation==='rank'?{options:candidates.map(x=>x.id),option_type:'place',signals:brief.references.map(x=>x.id)}:{group_a:brief.references.map(x=>x.id),group_b:candidates.map(x=>x.id),target_type:'book',limit:5};
+    if(signal.aborted)throw new AppError('CANCELLED','Research was cancelled.',499);
+    const key=JSON.stringify({operation,request}),cached=this.analyses.get(key);if(cached)return structuredClone(cached);
     const data=envelope(await this.execute(operation,request,signal));
     if(data.status==='needs_input')throw new AppError('ANALYSIS_UNAVAILABLE','This comparison could not resolve all inputs.',422);
     if(operation==='rank')list(data);
-    return {id:randomUUID(),source:'Qloo',operation,fetchedAt:new Date().toISOString(),request,entityIds:candidates.map(x=>x.id),metrics:{},details:data.results,metadata:metadata(data),limitations:['Analysis does not establish customer overlap or partner availability.',...warnings(data)]};
+    const record:EvidenceRecord={id:randomUUID(),source:'Qloo',operation,fetchedAt:new Date().toISOString(),request,entityIds:candidates.map(x=>x.id),metrics:{},details:data.results,metadata:metadata(data),limitations:['Analysis does not establish customer overlap or partner availability.',...warnings(data)]};
+    this.analyses.set(key,structuredClone(record));return record;
   }
 }

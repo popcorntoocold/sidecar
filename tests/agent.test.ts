@@ -1,6 +1,6 @@
 import {it,expect} from 'vitest';
 import {runResearch,assertEvidenceIds} from '../server/agent';
-import {type Brief,type Candidate} from '../shared/contracts';
+import {AppError,type Brief,type Candidate} from '../shared/contracts';
 const brief:Brief={city:'Austin',category:'cafe',objective:'A reading event',references:[1,2,3].map(i=>({id:`r${i}`,name:`Reference ${i}`,type:'book'})),rejectedIds:[]};
 const candidate:Candidate={id:'c',name:'Fixture Cafe',type:'place',address:'Fixture address',description:'Fixture',providerRank:1,evidenceIds:['e'],explanation:null};
 const evidence={id:'e',source:'Qloo' as const,operation:'recommend',fetchedAt:'2026-10-04',request:{},entityIds:['c'],metrics:{},details:[],limitations:[]};
@@ -35,4 +35,15 @@ it('surfaces provider limitations alongside the shortlist',async()=>{
   const p={discover:async()=>({candidates:[candidate],evidence:{...evidence,metadata:{warnings:['Nearby matching used']}}}),analyze:async()=>evidence};
   const result=await runResearch(brief,'tag',{provider:p,model:{next:async()=>({action:'finish'})}},new AbortController().signal);
   expect(result.warnings).toContain('Nearby matching used');
+});
+it('retries a transient discovery failure once and records that action',async()=>{
+  const p=provider();let attempts=0;
+  p.discover=async()=>{if(++attempts===1)throw new AppError('TEMPORARY','Temporary',503,true);return {candidates:[candidate],evidence};};
+  const result=await runResearch(brief,'tag',{provider:p,model:{next:async()=>({action:'finish'})}},new AbortController().signal);
+  expect(attempts).toBe(2);expect(result.events.some(e=>e.action==='Retry discovery')).toBe(true);
+});
+it('never retries authentication failures',async()=>{
+  const p=provider();let attempts=0;p.discover=async()=>{attempts++;throw new AppError('QLOO_AUTH','Rejected',503,false);};
+  await expect(runResearch(brief,'tag',{provider:p,model:{next:async()=>({action:'finish'})}},new AbortController().signal)).rejects.toMatchObject({code:'QLOO_AUTH'});
+  expect(attempts).toBe(1);
 });

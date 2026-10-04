@@ -7,12 +7,18 @@ import {OpenAIModel} from './model';
 import {runResearch,buildProposal} from './agent';
 import {ExpiringStore,RunLimiter} from './limits';
 import {createPreview,previewProposal} from './preview';
+import {compareWithBaseline} from './benchmark';
+import {type BaselineComparison} from '../shared/benchmark';
+import {runtimeConfig} from './config';
+import {describeRevision} from './revision';
 export async function createApp(){
+  const config=runtimeConfig();
   const app=Fastify({logger:false,bodyLimit:32768,requestTimeout:120000});
   await app.register(rateLimit,{max:60,timeWindow:'1 minute'});
   const provider=new QlooProvider(),model=new OpenAIModel();
   const runs=new ExpiringStore<ResearchResult>();const references=new ExpiringStore<Reference>(3600000,2000);const tags=new ExpiringStore<{id:string;name:string}[]>(3600000,8);
-  const limits=new RunLimiter({globalBudget:Number(process.env.QLOO_HOURLY_WORKFLOW_LIMIT)||30,clientBudget:20,concurrency:2});
+  const comparisons=new ExpiringStore<BaselineComparison>();const comparing=new Set<string>();
+  const limits=new RunLimiter({globalBudget:config.workflowLimit,clientBudget:20,concurrency:2});
   app.setErrorHandler((error,request,reply)=>{
     const status=error instanceof AppError?error.status:error instanceof z.ZodError?400:(error as {statusCode?:number}).statusCode??500;
     const message=error instanceof AppError?error.message:error instanceof z.ZodError?'Check the brief fields and choose three to five distinct references.':status===429?'Too many requests. Try again shortly.':status===413?'This request is too large.':'The request could not be completed.';
@@ -36,13 +42,22 @@ export async function createApp(){
     try{const result=await provider.tags(category,ac.signal);tags.set(category,result);return result;}finally{release();}
   });
   app.post('/api/research',async(request,reply)=>{
-    const body=z.object({brief:BriefSchema,categoryTag:z.string().min(1).max(200)}).strict().parse(request.body);requireQloo();
+    const body=z.object({brief:BriefSchema,categoryTag:z.string().min(1).max(200),previousRunId:z.string().min(1).max(100).optional()}).strict().parse(request.body);requireQloo();
     if(!model.configured)throw new AppError('MODEL_NOT_CONFIGURED','Configure the server’s model key and model name to enable the research agent.',503);
     const canonical=body.brief.references.map(r=>references.get(r.id));
     if(canonical.some(r=>!r)||!tags.get(body.brief.category)?.some(t=>t.id===body.categoryTag))throw new AppError('RESOLUTION_REQUIRED','Resolve your cultural references and confirm a partner category before researching.',422);
     const brief={...body.brief,references:canonical as Reference[]};
     const release=limits.acquire(request.ip,8),ac=new AbortController();const timer=setTimeout(()=>ac.abort(),110000);reply.raw.on('close',()=>ac.abort());
-    try{const run=await runResearch(brief,body.categoryTag,{provider,model},ac.signal);runs.set(run.id,run);return run;}finally{clearTimeout(timer);release();}
+    try{const run=await runResearch(brief,body.categoryTag,{provider,model},ac.signal);const previous=body.previousRunId?runs.get(body.previousRunId):undefined;if(previous?.mode==='live')run.revision=describeRevision(previous,run);else if(body.previousRunId)run.warnings.push('The earlier run expired. Its revision history is unavailable.');runs.set(run.id,run);return run;}finally{clearTimeout(timer);release();}
+  });
+  app.post('/api/comparison',async(request,reply)=>{
+    const {runId}=z.object({runId:z.string().min(1).max(100)}).strict().parse(request.body);
+    const run=runs.get(runId);if(!run)throw new AppError('RUN_EXPIRED','This research run expired. Run the brief again.',404);
+    if(run.mode!=='live')throw new AppError('LIVE_RUN_REQUIRED','The example cannot produce measured baseline results. Run a live brief first.',400);
+    const cached=comparisons.get(runId);if(cached)return cached;
+    if(comparing.has(runId))throw new AppError('COMPARISON_RUNNING','This comparison is already running.',409);
+    const release=limits.acquire(request.ip,2),ac=new AbortController();reply.raw.on('close',()=>ac.abort());comparing.add(runId);
+    try{const pair=await compareWithBaseline(run,model,ac.signal);comparisons.set(runId,pair);return pair;}finally{comparing.delete(runId);release();}
   });
   app.post('/api/proposal',async(request,reply)=>{
     const {runId,candidateId}=z.object({runId:z.string().max(100),candidateId:z.string().max(150)}).strict().parse(request.body);

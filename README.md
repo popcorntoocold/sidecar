@@ -21,7 +21,7 @@ On this Windows workspace, the compatible bundled Node executable is `C:\Users\h
 
 Request your own event-issued key from the [official Qloo resources](https://qloo.devpost.com/resources). Configure it privately. Never paste keys into Devpost, chat, source code, screenshots or browser fields.
 
-Copy `.env.example` to `.env`, then set `QLOO_API_KEY`, `OPENAI_API_KEY`, and `OPENAI_MODEL`. Choose a currently available OpenAI Chat Completions model supporting JSON output; no billable model is selected by default. Restart the server after setting credentials. The server fixes both Qloo endpoint settings to https://hackathon.api.qloo.com, as required for event-issued keys. Qloo calls use the pinned official `@qloo/qloo-harness` package, server-side.
+Copy `.env.example` to `.env`, then set `QLOO_API_KEY`, `OPENAI_API_KEY`, and `OPENAI_MODEL`. Set `OPENAI_MODEL=gpt-5.4-mini-2026-03-17` and an explicitly approved `OPENAI_TEST_BUDGET_USD`. This snapshot has a verified rate for the spend guard; other models are refused. No billable model or budget is selected by default in the template. Restart the server after setting credentials. The server fixes both Qloo endpoint settings to https://hackathon.api.qloo.com, as required for event-issued keys. Qloo calls use the pinned official `@qloo/qloo-harness` package, server-side.
 
 ```sh
 pnpm run check:live
@@ -29,7 +29,7 @@ pnpm run check:live
 
 The check makes minimal entity/tag requests, and fails explicitly if credentials are missing. It does not certify the complete integration. In the browser, resolve and confirm three cultural references, confirm a returned Qloo partner category, and run research. Verify the city, results, evidence and revisions before considering the entry live.
 
-`QLOO_HOURLY_WORKFLOW_LIMIT` caps reserved workflow calls per server process per hour. A workflow can make several API requests; configure this conservatively from the actual event quota. Public operation currently requires a single server process. Multiple replicas would need a shared limiter and store. The app reserves eight calls for each research run, limits concurrent requests, and keeps research records for 30 minutes. No customer records are collected.
+`QLOO_HOURLY_WORKFLOW_LIMIT` caps reserved workflow calls per server process per hour. A workflow can make several API requests; configure this conservatively from the actual event quota. Public operation currently requires a single server process. Multiple replicas would need a shared limiter and store. The app reserves eight calls for each research run, limits concurrent requests, and keeps research records and identical provider requests in bounded memory for 30 minutes. Exclusions reuse discovery and refresh analysis only when its inputs change. Cached evidence preserves its original retrieval time. No customer records are collected.
 
 ## How the agent works
 
@@ -37,7 +37,9 @@ The check makes minimal entity/tag requests, and fails explicitly if credentials
 2. Discover geographically filtered places using the confirmed references and category.
 3. Ask a constrained planner whether shortlist ranking or audience comparison would add useful evidence.
 4. Retain provider evidence and the original discovery order. Optional analysis is visible separately.
-5. Draft an editable collaboration proposal linked to known evidence records.
+5. Show changed inputs, partners, and reused evidence when the owner revises a brief.
+6. Draft an editable collaboration proposal linked to known evidence records.
+7. Optionally generate separate LLM-only and Qloo-grounded shortlists for the same initial brief. Export both outputs, provenance, model version, timestamps and measured latency.
 
 The server owns entity IDs and constraints. Model responses cannot issue arbitrary commands, change cities, or invent accepted citations. Provider content is treated as untrusted data. Credentials stay out of the browser bundle and logs.
 
@@ -48,7 +50,7 @@ Qloo metrics describe aggregate affinities. They do not establish actual custome
 ```sh
 pnpm test
 pnpm run build
-pnpm run evaluate -- path/to/redacted-live-runs.json
+pnpm run evaluate path/to/redacted-live-runs.json
 ```
 
 Tests cover validation, process isolation, provider parsing, cancellations, budgets, unsupported actions/citations, preview separation, stale UI requests and HTTP behavior. External providers are isolated with explicit fixtures. An offline green suite does not prove live Qloo compatibility.
@@ -59,7 +61,9 @@ The pinned pnpm setup applies patched transitive versions of undici and brace-ex
 
 ## Deployment
 
-The Dockerfile builds a single-process Node service. Configure secrets at the host, set a deliberate `QLOO_HOURLY_WORKFLOW_LIMIT`, expose port 4310 behind HTTPS, and keep the instance online through judging. Do not expose `.env` or development tooling publicly.
+The Dockerfile builds a single-process Node service. For paid usage, mount persistent storage, set an absolute `OPENAI_BUDGET_FILE` path on that storage, and provision write access for the container user (UID 1000). Never delete or reset the budget ledger during the same authorized test allowance. Each model request reserves a conservative upper bound before sending; failures retain their reservations. This guard is not a billing reconciliation report. A stale lock fails closed and requires operator review.
+
+Configure secrets at the host, set a deliberate `QLOO_HOURLY_WORKFLOW_LIMIT`, expose port 4310 behind HTTPS, and keep the instance online through judging. Do not expose `.env` or development tooling publicly.
 
 ```sh
 docker build -t sidecar-local .

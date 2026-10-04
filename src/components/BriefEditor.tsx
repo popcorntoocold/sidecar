@@ -3,7 +3,7 @@ import {MapPin,Plus,X,Search,ArrowRight,LoaderCircle,BookOpen,Music2,Film} from 
 import {type Brief,type Reference} from '../../shared/contracts';
 import {api} from '../api';
 import {RequestGate} from '../request-gate';
-export const freshBrief=():Brief=>({city:'Austin, Texas',category:'cafe',objective:'Bring new people into our independent bookstore with a thoughtful neighborhood event.',references:[],rejectedIds:[]});
+export const freshBrief=():Brief=>({businessName:'',businessType:'bookstore',city:'Austin, Texas',category:'cafe',objective:'Bring new people into our independent bookstore with a thoughtful neighborhood event.',references:[],rejectedIds:[]});
 export function BriefEditor({brief,setBrief,busy,onResearch,onExample,preview}:{brief:Brief;setBrief:(b:Brief)=>void;busy:boolean;onResearch:(tag:string)=>void;onExample:()=>void;preview:boolean}){
   const [query,setQuery]=useState(''),[type,setType]=useState('author'),[matches,setMatches]=useState<Reference[]>([]),[error,setError]=useState(''),[resolving,setResolving]=useState(false);
   const [tags,setTags]=useState<{id:string;name:string}[]>([]),[tag,setTag]=useState('');
@@ -28,6 +28,8 @@ export function BriefEditor({brief,setBrief,busy,onResearch,onExample,preview}:{
     <div className="panel-heading"><span className="step-number">1</span><h2>Your starting point</h2><span className="small-mark"><BookOpen size={17}/></span></div>
     <p className="panel-intro">Tell us where you are and what your audience loves.</p>
     <fieldset disabled={busy||preview}>
+      <label htmlFor="business-name">Business name <span className="muted">(optional)</span></label><input id="business-name" value={brief.businessName??''} maxLength={120} placeholder="Your business" onChange={e=>change({businessName:e.target.value})}/>
+      <label htmlFor="business-type">Your business</label><select id="business-type" value={brief.businessType??'bookstore'} onChange={e=>change({businessType:e.target.value as Brief['businessType']})}><option value="bookstore">Bookstore</option><option value="cafe">Café</option><option value="venue">Music or cultural venue</option><option value="restaurant">Restaurant</option><option value="other">Other independent business</option></select>
       <label htmlFor="city">Neighborhood or city</label><div className="input-icon"><MapPin size={16}/><input id="city" value={brief.city} maxLength={120} onChange={e=>change({city:e.target.value})}/></div>
       <label htmlFor="category">Meet a local…</label><select id="category" value={brief.category} onChange={e=>change({category:e.target.value as Brief['category']})}><option value="cafe">Café</option><option value="bookstore">Bookstore</option><option value="venue">Music venue</option><option value="restaurant">Restaurant</option></select>
       <label htmlFor="objective">What would you like to make happen?</label><textarea id="objective" value={brief.objective} maxLength={500} onChange={e=>change({objective:e.target.value})} rows={3}/>
