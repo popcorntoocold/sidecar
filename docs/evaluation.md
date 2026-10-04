@@ -34,7 +34,7 @@ Record role, voluntary feedback, task outcome, changes requested, and whether pe
 
 ## Verification record, October 4, 2026
 
-- 64 tests passed across 15 suites on the current local implementation. TypeScript and the production frontend build passed.
+- 65 tests passed across 15 suites on the current local implementation. TypeScript and the production frontend build passed.
 - Browser checks covered example discovery, evidence, comparison, exclusion, proposal generation and editing, and mobile overflow (375 CSS pixels). Print text mirrors edited fields in separate expanding document elements; physical printing was not exercised.
 - A clean Docker build and local production startup succeeded. The production API returned preview mode with four fictional candidates and zero exclusions.
 - The independent review found no Critical issues, three Important provider-adapter issues, and two Minor proposal issues. All five were addressed. Regression tests reproduced the provider issues before fixes and passed afterward.
@@ -54,3 +54,5 @@ The project owner approved up to $1 total OpenAI test usage for the GPT-5.4 mini
 Provider discovery and analysis reuse identical requests for at most 30 minutes in bounded server memory. Tests verify exclusions preserve the discovery record, changed cultural signals invalidate discovery, and changed shortlists invalidate analysis. Revision summaries display input changes and evidence IDs reused versus new to the run. Optional business names stay outside Qloo requests; they are sent to the model as proposal context. Provider provenance URLs are sanitized and linked where returned.
 
 Latest continuation verification: all 64 tests also passed in the Linux Docker build, followed by TypeScript and Vite compilation. The non-root production container started on loopback, served four labeled preview candidates and reported both providers unconfigured. The installed harness CLI started successfully with `--help`; no provider request was sent. Mobile inspection reported 375 CSS pixels for both viewport and content width. The temporary verification container was stopped and removed. Credential-pattern scans of tracked/untracked deliverable files and Git history found no matches; this is a focused scan, not a comprehensive security audit.
+
+A subsequent HTTP integration regression reproduced an early per-visitor limit during resolve → research → paired comparison → exclusion/revision. The per-visitor ceiling now permits 30 workflow reservations, capped by the unchanged global allowance. The full 65-test suite passes after the fix, including the server-owned revision chain and exclusion check. Providers in this integration test are explicit fixtures; it is not a live integration result.

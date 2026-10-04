@@ -1,8 +1,29 @@
-import {it,expect,afterEach} from 'vitest';
+import {it,expect,afterEach,vi} from 'vitest';
 import {createApp} from '../server/app';
 import {createPreview} from '../server/preview';
+import {QlooProvider} from '../server/qloo/provider';
+import {OpenAIModel} from '../server/model';
 const apps:Awaited<ReturnType<typeof createApp>>[]=[];
-afterEach(async()=>{for(const app of apps.splice(0))await app.close();});
+afterEach(async()=>{for(const app of apps.splice(0))await app.close();vi.restoreAllMocks();vi.unstubAllEnvs();});
+it('allows resolution, research, a paired comparison and revision within the global allowance',async()=>{
+  vi.stubEnv('QLOO_API_KEY','fixture-only');vi.stubEnv('QLOO_HOURLY_WORKFLOW_LIMIT','30');
+  vi.spyOn(OpenAIModel.prototype,'configured','get').mockReturnValue(true);
+  vi.spyOn(OpenAIModel.prototype,'next').mockResolvedValue({action:'finish'});
+  vi.spyOn(OpenAIModel.prototype,'compare').mockImplementation(async context=>({suggestions:context.candidates.map(c=>({name:c.name,entityId:c.id,reason:'Fixture reason',evidenceIds:c.evidenceIds}))}));
+  const fixture=createPreview();
+  vi.spyOn(QlooProvider.prototype,'resolve').mockImplementation(async query=>({status:'resolved',candidates:fixture.brief.references.filter(r=>r.name===query)}));
+  vi.spyOn(QlooProvider.prototype,'tags').mockResolvedValue([{id:'fixture-tag',name:'Cafe'}]);
+  vi.spyOn(QlooProvider.prototype,'discover').mockImplementation(async brief=>({candidates:fixture.candidates.filter(c=>!brief.rejectedIds.includes(c.id)),evidence:{...fixture.evidence[0],source:'Qloo'},cacheHit:false}));
+  const app=await createApp();apps.push(app);
+  for(const reference of fixture.brief.references){const response=await app.inject({method:'POST',url:'/api/resolve',payload:{query:reference.name}});expect(response.statusCode).toBe(200);}
+  expect((await app.inject({method:'GET',url:'/api/tags?category=cafe'})).statusCode).toBe(200);
+  const first=await app.inject({method:'POST',url:'/api/research',payload:{brief:fixture.brief,categoryTag:'fixture-tag'}});expect(first.statusCode).toBe(200);
+  expect((await app.inject({method:'POST',url:'/api/comparison',payload:{runId:first.json().id}})).statusCode).toBe(200);
+  const revised=await app.inject({method:'POST',url:'/api/research',payload:{brief:{...fixture.brief,rejectedIds:[fixture.candidates[0].id]},categoryTag:'fixture-tag',previousRunId:first.json().id}});
+  expect(revised.statusCode).toBe(200);
+  expect(revised.json().revision.previousRunId).toBe(first.json().id);
+  expect(revised.json().candidates.some((c:{id:string})=>c.id===fixture.candidates[0].id)).toBe(false);
+});
 it('rejects malformed research before provider access',async()=>{
   const app=await createApp();apps.push(app);
   const res=await app.inject({method:'POST',url:'/api/research',payload:{city:''}});

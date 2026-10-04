@@ -18,7 +18,7 @@ export async function createApp(){
   const provider=new QlooProvider(),model=new OpenAIModel();
   const runs=new ExpiringStore<ResearchResult>();const references=new ExpiringStore<Reference>(3600000,2000);const tags=new ExpiringStore<{id:string;name:string}[]>(3600000,8);
   const comparisons=new ExpiringStore<BaselineComparison>();const comparing=new Set<string>();
-  const limits=new RunLimiter({globalBudget:config.workflowLimit,clientBudget:20,concurrency:2});
+  const limits=new RunLimiter({globalBudget:config.workflowLimit,clientBudget:Math.min(30,config.workflowLimit),concurrency:2});
   app.setErrorHandler((error,request,reply)=>{
     const status=error instanceof AppError?error.status:error instanceof z.ZodError?400:(error as {statusCode?:number}).statusCode??500;
     const message=error instanceof AppError?error.message:error instanceof z.ZodError?'Check the brief fields and choose three to five distinct references.':status===429?'Too many requests. Try again shortly.':status===413?'This request is too large.':'The request could not be completed.';
