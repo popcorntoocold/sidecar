@@ -62,7 +62,7 @@ The app includes a comparison view of an LLM-only baseline and the Qloo-grounded
 - **Storage:** Session-scoped brief and result state. Store only the minimum cache allowed by event terms; start with short-lived server memory and invalidate when relevant inputs change.
 - **Model provider:** A server-side adapter chosen after confirming available credentials and pricing. No provider selected or billing authorization assumed by this spec. Use structured tool arguments and validated output.
 
-The [official kit](https://github.com/qloo/qloo-hackathon-kit) exposes Qloo through CLI and MCP workflows. The proposed backend uses that supported surface, with a direct API adapter considered only after verifying event compatibility. The current harness requires Node >=22.19.0; the local default is 22.13.1. Use a project-isolated compatible runtime instead of changing the machine default.
+The [official kit](https://github.com/qloo/qloo-hackathon-kit) exposes Qloo through CLI and MCP workflows. The proposed backend uses that supported surface, with a direct API adapter considered only after verifying event compatibility. The current harness requires Node >=22.19.0; the local default is 22.13.1. The bundled runtime at `C:\Users\haora\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe` was verified as v24.19.0 and meets this requirement. Use it without changing the machine default.
 
 ## Data and scoring
 
@@ -72,7 +72,7 @@ An EvidenceRecord includes source, workflow, retrieval time, resolved entity IDs
 
 Use ordering within a comparable provider result set. Do not combine unrelated affinity, popularity, or ranking values into a made-up confidence percentage. If shortlist ranking is supported, use one documented ranking request over the same candidate set and signals. Otherwise present the available ordering and its limits. Comparison of audiences is not customer overlap, market size, or purchase intent.
 
-The [Qloo public API overview](https://github.com/qloo/docs-public/blob/main/reference/api-overview.md) documents recommendation, lookup, location, and comparison capabilities. [Insights documentation](https://github.com/qloo/docs-public/blob/main/reference/insights-api-deep-dive.md) describes entity signals and geographical filters. Their availability, output schemas, and event credential permissions must be verified live.
+The [Qloo public API overview](https://github.com/qloo/docs-public/blob/main/reference/api-overview.md) documents recommendation, lookup, location, and comparison capabilities. [Insights documentation](https://github.com/qloo/docs-public/blob/main/reference/insights-api-deep-dive.md) describes entity signals, geographical filters, and per-recommendation input contributions under `query.explainability`. Prefer returned contributions for explanations when exposed by the chosen workflow. Locality matching may include nearby places by default; verify the resolved locality and use radius zero for strict boundaries. Availability, output schemas, and event credential permissions must be verified live.
 
 ## Visual design
 
