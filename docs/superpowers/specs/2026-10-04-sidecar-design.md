@@ -1,6 +1,6 @@
 # Sidecar project design
 
-Status: Product direction approved on October 4, 2026. Written specification awaiting review. No application has been implemented or deployed.
+Status: Product direction and written specification approved on October 4, 2026. No application has been implemented or deployed.
 
 ## Objective and audience
 
