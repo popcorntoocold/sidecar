@@ -4,7 +4,9 @@
 
 Find your next neighborhood collaboration using cultural evidence. Sidecar is a Qloo Agentic Hackathon project for independent bookstores and cultural businesses researching local partners.
 
-**Current state:** local application implemented. The complete illustrative walkthrough is usable. Live Qloo and model verification, public hosting, owner research, and competition submission are not complete. The example uses fictional businesses and never substitutes for live provider results.
+**Try the [public walkthrough](https://sidecar-qloo.onrender.com/)** and choose **Or explore a complete example**. It uses fictional businesses and never substitutes for live provider results. Free hosting may take about a minute to wake after inactivity.
+
+**Current state:** public illustrative workflow deployed and browser-tested. OpenAI connectivity and the persistent cloud budget guard are verified. Live Qloo research, evidence-grounded proposals, paired evaluation, owner research and competition submission remain pending.
 
 ![Sidecar illustrative walkthrough](docs/assets/preview.jpg)
 

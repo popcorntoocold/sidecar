@@ -4,6 +4,8 @@ As of October 4, 2026, offline tests and local browser checks have been run. No 
 
 ## Evidence already available
 
+- Public HTTPS walkthrough verified at https://sidecar-qloo.onrender.com/ on October 4: initial page, example loading, evidence panel and editable proposal. The public status correctly reports both providers unconfigured. Render reports the deployed `764ec76` commit Live on Free compute.
+- CI [37258451029](https://github.com/popcorntoocold/sidecar/actions/runs/37258451029) passed 75 application tests, compilation, a real Redis concurrency/restart budget check and production startup. The separate actual Upstash check also passed with 20 simultaneous synthetic reservations and no paid model calls. The production ledger preserves the prior $0.015230 reservation under the same $1 limit.
 - One authorized OpenAI connectivity check passed on October 4 with the selected GPT-5.4 mini snapshot (HTTP 200, valid finish action, approximately 2.1 seconds). Its input was synthetic and contained no candidates or Qloo evidence. Conservative reserved allowance: $0.015230 of the approved $1, not measured billing. This is not a live recommendation, proposal, or paired comparison result.
 - Automated behavioral tests for brief validation, process limits, secret-safe errors, provider parsing, agent bounds, citation validation, HTTP routes, stale responses, and preview separation.
 - Local browser walkthrough: example load, evidence expansion, side-by-side comparison and proposal generation.

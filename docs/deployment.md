@@ -1,6 +1,6 @@
 # Deployment handoff
 
-Prepared October 4, 2026. Nothing has been provisioned or purchased. The public source is [popcorntoocold/sidecar](https://github.com/popcorntoocold/sidecar); the live application is not deployed.
+Verified October 4, 2026. The [public illustrative walkthrough](https://sidecar-qloo.onrender.com/) is deployed on Render Free from commit `764ec76`. An account-owned Upstash Free database is provisioned, with eviction disabled and the shared $1 test ledger initialized to preserve the existing $0.015230 reservation. No hosting plan or domain was purchased. The public service has no paid API credentials. Live Qloo research is not yet verified.
 
 ## Selected free route
 
@@ -16,7 +16,7 @@ For live mode, use a dedicated [Upstash Redis Free database](https://upstash.com
 2. In private `.env`, set `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` and a stable `OPENAI_BUDGET_REDIS_KEY` such as `sidecar:budget:hackathon-2026`. Leave `OPENAI_BUDGET_FILE` pointing at the existing local ledger for migration.
 3. Run `node --env-file=.env --import tsx scripts/initialize-remote-budget.ts`. This copies the prior reserved amount and ceiling only if the remote record does not exist. An ambiguous result must be inspected, never repaired by resetting the balance.
 4. Point all subsequent local and hosted paid usage at this same remote ledger. Do not keep an independent local allowance. Never change the record key, reset its balance, attach a TTL, or increase the limit without a new explicit budget decision.
-5. Run the cloud-ledger smoke check with synthetic reservations on a separate disposable key before enabling paid requests. The local Redis check is `node scripts/verify-budget-redis.mjs`; it verifies atomic concurrent reservations, restart persistence and missing/corrupt/expiring-record refusal without paid APIs. The cloud-specific check is still pending account access.
+5. Run the cloud-ledger smoke check with synthetic reservations on a separate disposable key before enabling paid requests: `node --env-file=.env --import tsx scripts/verify-budget-upstash.ts`. This passed against the actual Upstash database on October 4 with 20 concurrent reservations, the exact expected ceiling, and refusal to reset an existing record. It used no OpenAI requests and removed its own test key. The local Redis check, `node scripts/verify-budget-redis.mjs`, also verifies restart persistence and missing/corrupt/expiring-record refusal.
 6. Configure the same remote variables privately on Render only when live Qloo access and quota are verified. Configure the approved model snapshot and $1 total test ceiling. Ongoing public inference beyond the approved test allowance needs separate authorization. A preview deployment does not establish a working Qloo integration.
 
 The server sends one atomic Lua reservation before each OpenAI request. Missing records, ceiling mismatch, timeout, malformed response, or provider refusal block paid inference. It never falls back to ephemeral files. If a response is lost after a successful reservation, the allowance stays reserved.
@@ -29,7 +29,7 @@ The 512 MB instance is a starting configuration, not a measured live capacity gu
 
 Render supports the required Node child processes via Docker. A [persistent disk](https://render.com/docs/disks) retains the model budget ledger across restarts; only files under its mount persist. The blueprint keeps a single instance and disables automatic deployments. Disk-backed deploys briefly interrupt service. Blueprint fields follow the [official reference](https://render.com/docs/blueprint-spec).
 
-## Before activating
+## Before activating the paid alternative
 
 1. Obtain approval for the actual hosting account and charges. The $1 OpenAI test authorization does not authorize hosting or ongoing public model spending.
 2. Obtain event-issued Qloo access and its quota. Run the [live validation protocol](live-validation.md) locally first. No fake/live substitution is permitted.
