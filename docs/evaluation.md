@@ -4,6 +4,7 @@ As of October 4, 2026, offline tests and local browser checks have been run. No 
 
 ## Evidence already available
 
+- One authorized OpenAI connectivity check passed on October 4 with the selected GPT-5.4 mini snapshot (HTTP 200, valid finish action, approximately 2.1 seconds). Its input was synthetic and contained no candidates or Qloo evidence. Conservative reserved allowance: $0.015230 of the approved $1, not measured billing. This is not a live recommendation, proposal, or paired comparison result.
 - Automated behavioral tests for brief validation, process limits, secret-safe errors, provider parsing, agent bounds, citation validation, HTTP routes, stale responses, and preview separation.
 - Local browser walkthrough: example load, evidence expansion, side-by-side comparison and proposal generation.
 - Production frontend compilation and TypeScript verification.

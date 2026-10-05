@@ -67,7 +67,9 @@ The pinned pnpm setup applies patched transitive versions of undici and brace-ex
 
 ## Deployment
 
-The Dockerfile builds a single-process Node service. For paid usage, mount persistent storage, set an absolute `OPENAI_BUDGET_FILE` path on that storage, and provision write access for the container user (UID 1000). Never delete or reset the budget ledger during the same authorized test allowance. Each model request reserves a conservative upper bound before sending; failures retain their reservations. This guard is not a billing reconciliation report. A stale lock fails closed and requires operator review.
+The Dockerfile builds a single-process Node service. The selected free deployment uses Render Free and a dedicated Upstash Free database for the model spending record. See the [free deployment procedure](docs/deployment.md) and [preview blueprint](deploy/render-free.yaml). A custom domain is optional. Free Render instances sleep after inactivity, so opening the demo can take about a minute.
+
+Paid model usage needs either the complete remote ledger configuration or an absolute `OPENAI_BUDGET_FILE` path on persistent storage writable by the container user (UID 1000). Never delete or reset the ledger during the same authorized allowance. Each request reserves a conservative upper bound before sending; failures retain reservations. Missing or unverifiable remote records block requests, and never fall back to ephemeral local files. This guard is not a billing reconciliation report.
 
 Configure secrets at the host, set a deliberate `QLOO_HOURLY_WORKFLOW_LIMIT`, expose port 4310 behind HTTPS, and keep the instance online through judging. Do not expose `.env` or development tooling publicly.
 
@@ -78,7 +80,7 @@ docker run --rm -p 127.0.0.1:4311:4310 -e QLOO_HOURLY_WORKFLOW_LIMIT=30 sidecar-
 
 That command starts only a local preview without keys. A public URL and verified live-provider behavior are still required for the competition.
 
-The GitHub verification workflow builds the container, runs its tests and compiler, then checks the production preview with no provider keys. It never uses paid API credentials.
+The GitHub verification workflow builds the container, runs its tests and compiler, checks concurrent budget reservations against real Redis, then checks the production preview with no provider keys. It never uses paid API credentials.
 
 ## Project documents
 

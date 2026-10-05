@@ -2,12 +2,13 @@ import {AppError} from '../shared/contracts';
 import {type AgentContext,type ModelClient} from './agent';
 import {resolve} from 'node:path';
 import {ModelSpendGuard} from './spend';
+import {RemoteModelSpendGuard,remoteBudgetConfig,type RemoteBudgetConfig} from './remote-spend';
 import {COMPARISON_INSTRUCTIONS,type ComparisonContext} from './benchmark';
-type ModelConfig={apiKey?:string;model?:string;budgetUsd?:number;budgetPath?:string};
+type ModelConfig={apiKey?:string;model?:string;budgetUsd?:number;budgetPath?:string;remote?:RemoteBudgetConfig};
 export class OpenAIModel implements ModelClient{
-  private spend:ModelSpendGuard;
-  constructor(private config:ModelConfig={apiKey:process.env.OPENAI_API_KEY,model:process.env.OPENAI_MODEL,budgetUsd:Number(process.env.OPENAI_TEST_BUDGET_USD),budgetPath:process.env.OPENAI_BUDGET_FILE}){
-    this.spend=new ModelSpendGuard({limitUsd:config.budgetUsd??0,path:config.budgetPath??resolve('.local/openai-budget.json')});
+  private spend:ModelSpendGuard|RemoteModelSpendGuard;
+  constructor(private config:ModelConfig={apiKey:process.env.OPENAI_API_KEY,model:process.env.OPENAI_MODEL,budgetUsd:Number(process.env.OPENAI_TEST_BUDGET_USD),budgetPath:process.env.OPENAI_BUDGET_FILE,remote:remoteBudgetConfig(process.env)}){
+    this.spend=config.remote?new RemoteModelSpendGuard({...config.remote,limitUsd:config.budgetUsd??0}):new ModelSpendGuard({limitUsd:config.budgetUsd??0,path:config.budgetPath??resolve('.local/openai-budget.json')});
   }
   get configured(){return Boolean(this.config.apiKey&&this.config.model&&Number.isFinite(this.config.budgetUsd)&&(this.config.budgetUsd??0)>0);}
   get name(){return this.config.model??'unconfigured';}
@@ -17,7 +18,8 @@ export class OpenAIModel implements ModelClient{
     const requestBytes=Buffer.byteLength(body);
     if(requestBytes>80000)throw new AppError('MODEL_INPUT_LIMIT','This research record is too large to summarize.');
     if(signal?.aborted)throw new AppError('CANCELLED','The model request was cancelled.',499);
-    this.spend.reserve(this.name,requestBytes,1800);
+    await this.spend.reserve(this.name,requestBytes,1800,signal);
+    if(signal?.aborted)throw new AppError('CANCELLED','The model request was cancelled.',499);
     let response:Response;
     try{response=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${this.config.apiKey}`},body,signal:AbortSignal.any([signal??new AbortController().signal,AbortSignal.timeout(30000)])});}
     catch{throw new AppError('MODEL_UNAVAILABLE','The planning service could not respond. Try again.',502,true);}

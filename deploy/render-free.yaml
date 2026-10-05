@@ -1,0 +1,19 @@
+# Free preview deployment. No paid API credentials or disk are provisioned.
+# Enable live mode only after docs/deployment.md's remote ledger checks.
+services:
+  - type: web
+    name: sidecar-qloo
+    runtime: docker
+    repo: https://github.com/popcorntoocold/sidecar
+    branch: main
+    plan: free
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: off
+    healthCheckPath: /api/status
+    envVars:
+      - key: QLOO_HOURLY_WORKFLOW_LIMIT
+        value: '30'
+      - key: OPENAI_TEST_BUDGET_USD
+        value: '0'

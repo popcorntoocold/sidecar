@@ -6,14 +6,19 @@ import {AppError} from '../shared/contracts';
 // Standard text rates verified against the official model page, October 4, 2026.
 // Reserve a conservative upper bound before each attempt, including failed calls.
 const supportedModels=new Set(['gpt-5.4-mini','gpt-5.4-mini-2026-03-17']);
+export function reservationMicros(model:string,requestBytes:number,maxOutputTokens:number,limitUsd:number){
+  if(!Number.isFinite(limitUsd)||limitUsd<=0||!Number.isSafeInteger(Math.floor(limitUsd*1000000)))throw new AppError('MODEL_BUDGET_REQUIRED','Set an explicitly authorized OpenAI test budget before making paid requests.',503);
+  if(!supportedModels.has(model))throw new AppError('MODEL_PRICE_UNKNOWN','This model has no verified budget rate. Configure the documented GPT-5.4 mini snapshot.',503);
+  if(!Number.isSafeInteger(requestBytes)||requestBytes<0||!Number.isSafeInteger(maxOutputTokens)||maxOutputTokens<=0)throw new Error('Invalid model reservation');
+  const amount=Math.ceil((requestBytes+8192)*0.75+maxOutputTokens*4.5);
+  if(!Number.isSafeInteger(amount))throw new Error('Invalid model reservation');
+  return amount;
+}
 export class ModelSpendGuard{
   constructor(private config:{limitUsd:number;path:string}){}
-  reserve(model:string,requestBytes:number,maxOutputTokens:number){
+  reserve(model:string,requestBytes:number,maxOutputTokens:number,_signal?:AbortSignal){
     const {limitUsd,path}=this.config;
-    if(!Number.isFinite(limitUsd)||limitUsd<=0)throw new AppError('MODEL_BUDGET_REQUIRED','Set an explicitly authorized OpenAI test budget before making paid requests.',503);
-    if(!supportedModels.has(model))throw new AppError('MODEL_PRICE_UNKNOWN','This model has no verified budget rate. Configure the documented GPT-5.4 mini snapshot.',503);
-    if(!Number.isSafeInteger(requestBytes)||requestBytes<0||!Number.isSafeInteger(maxOutputTokens)||maxOutputTokens<=0)throw new Error('Invalid model reservation');
-    const reservedMicros=Math.ceil((requestBytes+8192)*0.75+maxOutputTokens*4.5);
+    const reservedMicros=reservationMicros(model,requestBytes,maxOutputTokens,limitUsd);
     mkdirSync(dirname(path),{recursive:true});
     let lock:number;
     try{lock=openSync(path+'.lock','wx');}catch{throw new AppError('MODEL_BUDGET_BUSY','The model budget record is busy. Retry later; an interrupted request may need operator review.',503);}

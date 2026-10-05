@@ -23,3 +23,43 @@ it('bounds UTF-8 bytes before reserving or sending',async()=>{
   await expect(new OpenAIModel(options).proposal({text:'你'.repeat(30000)},new AbortController().signal)).rejects.toMatchObject({code:'MODEL_INPUT_LIMIT'});
   expect(fetch).not.toHaveBeenCalled();expect(existsSync(options.budgetPath)).toBe(false);
 });
+const remote={url:'https://sidecar-fixture.upstash.io',token:'storage-fixture',key:'sidecar:budget:test'};
+it('waits for a durable remote reservation before sending a paid request without a local ledger',async()=>{
+  const options={...config(),remote};let reserved=false;
+  vi.stubGlobal('fetch',vi.fn(async(url,request)=>{
+    if(url===remote.url){
+      expect(request.headers.Authorization).toBe('Bearer storage-fixture');
+      const command=JSON.parse(request.body);
+      expect(command.slice(0,1)).toEqual(['EVAL']);
+      expect(command.slice(2,4)).toEqual([1,remote.key]);
+      expect(command[5]).toBe(1000000);
+      await new Promise(resolve=>setTimeout(resolve,5));reserved=true;
+      return Response.json({result:25000});
+    }
+    expect(reserved).toBe(true);
+    return Response.json({choices:[{message:{content:'{"value":"reserved"}'}}]});
+  }));
+  expect(await new OpenAIModel(options).proposal({},new AbortController().signal)).toEqual({value:'reserved'});
+  expect(existsSync(options.budgetPath)).toBe(false);
+});
+it.each([
+  [{result:-1},200,'MODEL_BUDGET_EXHAUSTED'],
+  [{result:-2},200,'MODEL_BUDGET_UNREADABLE'],
+  [{result:0},200,'MODEL_BUDGET_UNREADABLE'],
+  [{result:1000001},200,'MODEL_BUDGET_UNREADABLE'],
+  [{result:'25000'},200,'MODEL_BUDGET_UNREADABLE'],
+  [{error:'private provider error'},401,'MODEL_BUDGET_UNREADABLE']
+])('does not send a paid request when the remote budget cannot authorize it (%j)',async(payload,status,code)=>{
+  const options={...config(),remote};let paidRequests=0;
+  vi.stubGlobal('fetch',vi.fn(async(url)=>{
+    if(url===remote.url)return Response.json(payload,{status});
+    paidRequests++;return Response.json({choices:[{message:{content:'{}'}}]});
+  }));
+  await expect(new OpenAIModel(options).proposal({},new AbortController().signal)).rejects.toMatchObject({code});
+  expect(paidRequests).toBe(0);expect(existsSync(options.budgetPath)).toBe(false);
+});
+it('rejects untrusted remote destinations before sending either credential',async()=>{
+  const fetch=vi.fn();vi.stubGlobal('fetch',fetch);
+  await expect(new OpenAIModel({...config(),remote:{...remote,url:'https://sidecar-fixture.upstash.io.attacker.example'}}).proposal({},new AbortController().signal)).rejects.toMatchObject({code:'MODEL_BUDGET_CONFIG'});
+  expect(fetch).not.toHaveBeenCalled();
+});

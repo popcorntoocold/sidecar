@@ -20,6 +20,8 @@ jobs:
           persist-credentials: false
       - name: Build, typecheck and test in the production container
         run: docker build -t sidecar-ci .
+      - name: Verify atomic budget reservations with real Redis
+        run: node scripts/verify-budget-redis.mjs
       - name: Verify production startup without provider credentials
         shell: bash
         run: |
