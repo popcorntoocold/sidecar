@@ -1,6 +1,6 @@
 # Live validation protocol
 
-Status: prepared, not executed. All tables below are blank observation templates. No owner has been contacted and no live recommendation-quality result has been measured.
+Status: the first local live execution occurred October 6, 2026. See [results, retained failures and limitations](live-results-2026-10-06.md). The blank tables below remain reusable templates. No owner has been contacted and no recommendation-quality advantage has been established.
 
 ## Fixed briefs
 

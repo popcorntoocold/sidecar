@@ -6,11 +6,11 @@ Find your next neighborhood collaboration using cultural evidence. Sidecar is a 
 
 **Try the [public walkthrough](https://sidecar-qloo.onrender.com/)** and choose **Or explore a complete example**. It uses fictional businesses and never substitutes for live provider results. Free hosting may take about a minute to wake after inactivity.
 
-**Current state:** public illustrative workflow deployed and browser-tested. OpenAI connectivity and the persistent cloud budget guard are verified. Live Qloo research, evidence-grounded proposals, paired evaluation, owner research and competition submission remain pending.
+**Current state (October 6, 2026):** local live Qloo discovery verified on three fixed briefs, with paired model comparisons and proposal generation. Exclusions reuse evidence, and a changed cultural reference refreshes discovery. Live tests exposed category and geographic limitations, so no recommendation-quality advantage is claimed. The public host still serves the illustrative walkthrough; live public deployment, owner feedback, demo video and final submission remain pending. See [live findings](docs/live-results-2026-10-06.md).
 
 ![Sidecar illustrative walkthrough](docs/assets/preview.jpg)
 
-*Local example with fictional businesses. Live integration is pending credentials.*
+*Illustrative example with fictional businesses. Local live results are documented separately.*
 
 ## Try it locally
 

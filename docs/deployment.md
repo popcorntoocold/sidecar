@@ -12,6 +12,8 @@ For live mode, use a dedicated [Upstash Redis Free database](https://upstash.com
 
 ### Initialize the shared budget once
 
+October 6 update: the key is configured locally and the first live protocol is recorded in [the live report](live-results-2026-10-06.md). Public provider credentials are still absent. The official hackathon guide documents rate limits without a numeric quota; optional analysis hit a rate limit during testing. Keep the conservative single-process limit and do not claim it equals an issued quota. The historical initialization balance below must never be used to reset the now-higher current ledger.
+
 1. Stop every local process that could make paid model calls. Preserve `.local/openai-budget.json`, including failed-call reservations. The first authorized connectivity test reserved **$0.015230**, not measured billing, under the existing $1 total test cap.
 2. In private `.env`, set `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` and a stable `OPENAI_BUDGET_REDIS_KEY` such as `sidecar:budget:hackathon-2026`. Leave `OPENAI_BUDGET_FILE` pointing at the existing local ledger for migration.
 3. Run `node --env-file=.env --import tsx scripts/initialize-remote-budget.ts`. This copies the prior reserved amount and ceiling only if the remote record does not exist. An ambiguous result must be inspected, never repaired by resetting the balance.

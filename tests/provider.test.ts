@@ -2,6 +2,18 @@ import {it,expect} from 'vitest';
 import {QlooProvider,parseCandidates,parseResolution} from '../server/qloo/provider';
 const signal=new AbortController().signal;
 const brief={city:'Austin',category:'cafe' as const,objective:'A reading event',references:[{id:'ref',name:'Book',type:'book'}],rejectedIds:[]};
+it('uses the place subtype instead of the generic entity label',()=>{
+  expect(parseCandidates({status:'ok',results:[{entity_id:'a',name:'Cafe',type:'urn:entity',subtype:'urn:entity:place'}]},'record',[])[0].type).toBe('urn:entity:place');
+});
+it('distinguishes identical tag names by their provider taxonomy',async()=>{
+  const provider=new QlooProvider(async()=>({status:'ok',results:[{id:'urn:tag:cuisine:qloo:coffee_shop',name:'Coffee Shop'},{id:'urn:tag:category:place:coffee_shop',name:'Coffee Shop'}]}));
+  const tags=await provider.tags('cafe',signal);
+  expect(tags.map(t=>t.name)).toEqual(['Coffee Shop (cuisine)','Coffee Shop (place category)']);
+});
+it('preserves the resolved canonical type when entity details omit it',()=>{
+  const result=parseResolution({status:'ok',results:[{entity_id:'author-id',name:'Author'}],resolution:{outcomes:[{selected:{id:'author-id',name:'Author',type:'urn:entity:author'}},{selected:{id:'other',type:'urn:entity:movie'}}]}});
+  expect(result.candidates[0].type).toBe('urn:entity:author');
+});
 it('reuses discovery for an exclusion or objective edit and invalidates it for changed signals',async()=>{
   let calls=0;
   const p=new QlooProvider(async(_op,input)=>{calls++;return {status:'ok',interpretation:{filter_location:input.filter_location},results:[{id:'one',name:'One'},{id:'two',name:'Two'}]};});

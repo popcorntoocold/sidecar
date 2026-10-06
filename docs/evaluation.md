@@ -1,6 +1,6 @@
 # Sidecar evaluation status
 
-As of October 4, 2026, offline tests and local browser checks have been run. No live Qloo result, LLM baseline, owner interview, revenue result or measured recommendation-quality advantage is established.
+Current status, October 6, 2026: three fixed local live Qloo briefs, three validated paired model comparisons, exclusion/cache checks and a changed-reference check are recorded in [the live report](live-results-2026-10-06.md). The report retains failures and category/geographic limitations. No owner interview, revenue result or measured recommendation-quality advantage is established. The notes below are historical October 4 records and do not describe current credential state.
 
 ## Evidence already available
 

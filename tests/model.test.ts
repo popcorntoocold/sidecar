@@ -4,6 +4,16 @@ import {join} from 'node:path';
 import {it,expect,vi,afterEach} from 'vitest';
 import {OpenAIModel} from '../server/model';
 const dirs:string[]=[];
+it('sends proposal field and length constraints as a strict output schema',async()=>{
+  let body:any;
+  vi.stubGlobal('fetch',async(_url:any,request:any)=>{body=JSON.parse(request.body);return Response.json({choices:[{message:{content:'{}'}}]});});
+  await new OpenAIModel(config()).proposal({},new AbortController().signal);
+  expect(body.response_format).toMatchObject({type:'json_schema',json_schema:{strict:true,schema:{additionalProperties:false,properties:{title:{maxLength:160},agenda:{maxItems:6},verificationQuestions:{maxItems:8}}}}});
+});
+it.each([{finish_reason:'length',message:{content:'{}'}},{finish_reason:'stop',message:{content:'{}',refusal:'Cannot comply'}}])('rejects incomplete or refused model outputs',async(choice)=>{
+  vi.stubGlobal('fetch',async()=>Response.json({choices:[choice]}));
+  await expect(new OpenAIModel(config()).proposal({},new AbortController().signal)).rejects.toMatchObject({code:'INVALID_MODEL_OUTPUT'});
+});
 function config(){const dir=mkdtempSync(join(tmpdir(),'sidecar-model-'));dirs.push(dir);return {apiKey:'fixture-key',model:'gpt-5.4-mini-2026-03-17',budgetUsd:1,budgetPath:join(dir,'budget.json')};}
 afterEach(()=>{vi.unstubAllGlobals();for(const dir of dirs.splice(0))rmSync(dir,{recursive:true,force:true});});
 it('requires an authorized budget before a request is possible',async()=>{

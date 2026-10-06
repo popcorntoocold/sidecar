@@ -32,6 +32,18 @@ it('rejects invented entity IDs or evidence in the grounded condition', async ()
   const client=model();client.compare=async context=>({suggestions:[{name:'Invented',entityId:context.candidates.length?'fake':null,reason:'test',evidenceIds:context.candidates.length?['fake']:[]}]});
   await expect(compareWithBaseline(liveRun(),client,signal)).rejects.toMatchObject({code:'UNSUPPORTED_COMPARISON'});
 });
+it('does not expose off-shortlist discovery records to the comparison model',async()=>{
+  const run=liveRun(),selected=run.candidates[0];
+  run.evidence[0].operation='recommend';
+  run.evidence[0].details=[{entity_id:selected.id,name:selected.name},{entity_id:'outside',name:'Outside shortlist'}];
+  run.evidence[0].entityIds=[selected.id,'outside'];
+  const client=model(),original=client.compare;let input:unknown;
+  client.compare=async(context,s)=>{if(context.candidates.length)input=context;return original(context,s);};
+  await compareWithBaseline(run,client,signal);
+  expect(JSON.stringify(input)).not.toContain('Outside shortlist');
+  expect(JSON.stringify(input)).not.toContain('outside');
+  expect((run.evidence[0].details as unknown[]).length).toBe(2);
+});
 it('does not accept baseline citations or silently keep one side after failure', async () => {
   const client=model(); client.compare=async()=>({suggestions:[{name:'Unverified',entityId:null,reason:'test',evidenceIds:['fake']}]});
   await expect(compareWithBaseline(liveRun(),client,signal)).rejects.toMatchObject({code:'UNSUPPORTED_COMPARISON'});

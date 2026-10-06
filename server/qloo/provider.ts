@@ -4,7 +4,7 @@ import {AppError,type Brief,type Candidate,type EvidenceRecord,type Resolution,t
 import {executeQloo} from './process';
 import {ExpiringStore} from '../limits';
 const Envelope=z.object({status:z.enum(['ok','empty','needs_input']),results:z.union([z.array(z.unknown()),z.record(z.string(),z.unknown())]),interpretation:z.record(z.string(),z.unknown()).optional(),resolution:z.unknown().optional()}).passthrough();
-const Entity=z.object({entity_id:z.string().optional(),id:z.string().optional(),name:z.string(),type:z.string().optional(),affinity:z.number().finite().optional(),popularity:z.number().finite().optional(),properties:z.record(z.string(),z.unknown()).optional(),explainability:z.unknown().optional()}).passthrough();
+const Entity=z.object({entity_id:z.string().optional(),id:z.string().optional(),name:z.string(),type:z.string().optional(),subtype:z.string().optional(),affinity:z.number().finite().optional(),popularity:z.number().finite().optional(),properties:z.record(z.string(),z.unknown()).optional(),explainability:z.unknown().optional()}).passthrough();
 export type QlooExecute=(operation:string,input:Record<string,unknown>,signal:AbortSignal)=>Promise<unknown>;
 function envelope(raw:unknown){const parsed=Envelope.safeParse(raw);if(!parsed.success)throw new AppError('INVALID_PROVIDER_OUTPUT','Qloo returned an unexpected response.');return parsed.data;}
 function object(raw:unknown):Record<string,unknown>{return raw!==null&&typeof raw==='object'&&!Array.isArray(raw)?raw as Record<string,unknown>:{};}
@@ -37,7 +37,9 @@ export function parseResolution(raw:unknown):Resolution{
     const candidates=Array.isArray(issues)?issues.flatMap(issue=>{const values=object(issue).candidates;return Array.isArray(values)?values.flatMap(x=>{const r=ref(x);return r?[r]:[];}):[];}):[];
     return {status:candidates.length?'ambiguous':'not_found',candidates};
   }
-  const candidates=list(data).flatMap(x=>{const r=ref(x);return r?[r]:[];});
+  const outcomes=object(data.resolution).outcomes;
+  const selected=Array.isArray(outcomes)?outcomes.map(x=>object(object(x).selected)):[];
+  const candidates=list(data).flatMap(x=>{const r=ref(x);if(r&&r.type==='entity'){const match=selected.find(s=>s.id===r.id);if(typeof match?.type==='string')r.type=match.type;}return r?[r]:[];});
   return {status:candidates.length===1?'resolved':candidates.length?'ambiguous':'not_found',candidates};
 }
 export function parseCandidates(raw:unknown,evidenceId:string,rejectedIds:string[]):Candidate[]{
@@ -49,7 +51,7 @@ export function parseCandidates(raw:unknown,evidenceId:string,rejectedIds:string
     const item=parsed.data,id=item.entity_id??item.id;
     if(!id)throw new AppError('INVALID_PROVIDER_OUTPUT','A Qloo result did not include an entity ID.');
     if(seen.has(id))return [];seen.add(id);
-    return [{id,name:item.name,type:item.type??'place',address:string(item.properties?.address,'Address not supplied'),description:string(item.properties?.short_description??item.properties?.description,'Explore the underlying cultural evidence before proposing a partnership.'),providerRank:i+1,affinity:item.affinity,popularity:item.popularity,evidenceIds:[evidenceId],explanation:item.explainability??null}];
+    return [{id,name:item.name,type:item.subtype??item.type??'place',address:string(item.properties?.address,'Address not supplied'),description:string(item.properties?.short_description??item.properties?.description,'Explore the underlying cultural evidence before proposing a partnership.'),providerRank:i+1,affinity:item.affinity,popularity:item.popularity,evidenceIds:[evidenceId],explanation:item.explainability??null}];
   });
 }
 export class QlooProvider{
@@ -60,7 +62,7 @@ export class QlooProvider{
   async tags(category:string,signal:AbortSignal):Promise<{id:string;name:string}[]>{
     const labels:Record<string,string>={cafe:'coffee shop',bookstore:'bookstore',venue:'music venue',restaurant:'restaurant'};
     const data=envelope(await this.execute('find_tags',{query:labels[category]??category,limit:5},signal));
-    return list(data).flatMap(raw=>{const item=object(raw);return typeof item.id==='string'&&typeof item.name==='string'?[{id:item.id,name:item.name}]:[];});
+    return list(data).flatMap(raw=>{const item=object(raw);if(typeof item.id!=='string'||typeof item.name!=='string')return [];const parts=item.id.split(':'),scope=parts[0]==='urn'&&parts[1]==='tag'?parts[3]==='place'?`place ${parts[2]}`:parts[2]?.replaceAll('_',' '):undefined;return [{id:item.id,name:scope?`${item.name} (${scope})`:item.name}];});
   }
   async discover(brief:Brief,categoryTag:string,signal:AbortSignal){
     const request={target_type:'place',signals:brief.references.map(x=>x.id),filter_location:brief.city,include_tags:[categoryTag],explain:true,limit:10};

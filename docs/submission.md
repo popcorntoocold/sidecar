@@ -16,13 +16,13 @@ Independent businesses can have complementary audiences without an obvious conne
 
 Sidecar begins with a business's city, collaboration objective, and cultural references. Its proposed live workflow resolves the references with Qloo, discovers nearby partners, gathers cultural evidence, and drafts a collaboration brief. Owners can inspect sources, compare candidates, reject a partner and revise the shortlist.
 
-The local implementation already includes this interface and a separate, explicitly fictional walkthrough. The Qloo adapter and bounded planning loop are implemented but have not been exercised with event credentials. The paired LLM-only comparison, revision history, evidence reuse and persistent model test-budget guard are implemented and fixture-tested. No quality advantage is claimed from these offline tests.
+The local live workflow has now been exercised with event credentials on three fixed briefs. Paired model comparisons, proposals and exclusion revisions have been recorded, including failed attempts. Changing a cultural reference refreshed discovery. The public app still offers a separate fictional walkthrough. Category suitability and surrounding-area matches remain material limitations; no quality advantage is claimed. See the [October 6 live report](live-results-2026-10-06.md).
 
 ## Qloo integration
 
 The backend uses the official Qloo harness for entity description, tag discovery, geographically filtered recommendations, shortlist ranking and audience comparison. Recommendations retain their provider evidence. Sidecar distinguishes aggregate affinity from actual customer overlap and treats the generated event proposal as a suggestion requiring verification.
 
-Before submission, replace this paragraph with a concise explanation of the workflows successfully demonstrated against live credentials, including a redacted request and result.
+Live verification covers describe, find_tags and recommend. The planner chose to finish after discovery in the initial fixed runs; optional rank and audience comparison remain unverified live. Raw credentials and private provider logs are excluded from submission materials.
 
 ## Engineering
 
@@ -43,9 +43,10 @@ React/TypeScript interface, Node server, typed input validation, server-owned to
 - [x] Local app and labeled example workflow implemented.
 - [x] Source-level provider and agent tests added.
 - [x] Event API key requested and receipt confirmed.
-- [ ] Event key configured and live Qloo workflows verified.
-- [ ] Model configured and live tool decisions and proposal verified.
-- [ ] Live baseline comparison and owner feedback completed.
+- [x] Event key configured; live resolution, tags and discovery verified locally.
+- [x] Model configured; live finish decisions and proposals recorded locally.
+- [x] Three local paired comparisons validated, with failed attempts retained.
+- [ ] Independent owner feedback completed.
 - [x] Public illustrative walkthrough deployed and tested anonymously.
 - [ ] Public live Qloo workflow deployed and verified.
 - [x] Repository published with MIT license detected.
