@@ -48,6 +48,21 @@ These spot checks are not a complete independent audit. Other entities and basel
 
 The model-only Austin output also included bookstores when a café was requested. Neither condition is established as superior. Further work should prioritize category suitability, verification and clearer partner constraints before a final competitive demo. Do not cherry-pick the Austin success as proof that every city/category works.
 
+## Public deployment and browser verification
+
+On October 6, the owner approved storing the provider and ledger credentials on Render Free and a $3 total model allowance for public use through judging on November 16. The remote ceiling was atomically raised from 1,000,000 to 3,000,000 microdollars while preserving 827,362 already reserved. The record key and persistent TTL were unchanged. Local paid service was stopped before the change.
+
+Render deploy `dep-db29lfrncjis73dtppo0` successfully deployed source `2e54ca65630255bf6cc43715fd45c08fe7666bd8`. Its build passed 82 tests and TypeScript/Vite compilation. The public status returned all three configuration booleans true. Actual browser requests, not status alone, then verified:
+
+- Haruki Murakami (author), Khruangbin (artist), and the 1995 Before Sunrise film resolved and were explicitly confirmed.
+- Coffee shop (place category) returned five Austin-area partners. Evidence `4d3fef96-c45e-4699-8b28-8a6ac258fe90` was retrieved at `2026-10-06T06:56:02.148Z` with the exact three IDs, Austin location and category tag.
+- Palomino Coffee produced a live proposal. Its title was edited and JSON downloaded through the public UI. The download retained the edited title, live mode, correct partner and a valid evidence citation.
+- Excluding The Yard removed it, added Mozart's Coffee Roasters and displayed one reused evidence record and zero new records.
+
+The shared ledger read 924,768 reserved microdollars after these checks, below the 3,000,000 cap. This is a conservative reservation total, not an invoice. No hosting plan, card or domain was purchased. The public demo can stop paid requests when the allowance is exhausted; free hosting also has cold starts and provider/workflow limits.
+
+Desktop presentation was visually inspected and screenshots captured. The browser viewport override did not apply the requested 375px width, so this run does not establish mobile verification. The override was reset. Public baseline generation was not repeated because the three local pairs already exist; optional analysis is still unverified live.
+
 ## Still incomplete
 
-Public live workflow and responsive browser verification, complete independent entity audit, live optional analysis verification, final video/screenshots, owner feedback and final submission. Public preview deployment is separate from these local live results. Ongoing public model usage is not covered by the test-only authorization.
+Current mobile browser verification, complete independent entity audit, live optional analysis verification, final video, owner feedback and final submission. Public live operation is now authorized within the shared $3 total allowance through judging; increasing it needs a new budget decision.

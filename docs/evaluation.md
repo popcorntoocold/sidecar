@@ -1,6 +1,6 @@
 # Sidecar evaluation status
 
-Current status, October 6, 2026: three fixed local live Qloo briefs, three validated paired model comparisons, exclusion/cache checks and a changed-reference check are recorded in [the live report](live-results-2026-10-06.md). The report retains failures and category/geographic limitations. No owner interview, revenue result or measured recommendation-quality advantage is established. The notes below are historical October 4 records and do not describe current credential state.
+Current status, October 6, 2026: three fixed local live Qloo briefs, three validated paired model comparisons, exclusion/cache checks and a changed-reference check are recorded in [the live report](live-results-2026-10-06.md). The public Render deployment at `2e54ca6` additionally passed desktop resolution, category confirmation, discovery, evidence inspection, proposal editing/export and exclusion revision. Current mobile verification remains incomplete because the viewport override did not apply. The report retains failures and category/geographic limitations. No owner interview, revenue result or measured recommendation-quality advantage is established. The notes below are historical October 4 records and do not describe current credential state.
 
 ## Evidence already available
 

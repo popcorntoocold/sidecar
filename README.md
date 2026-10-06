@@ -4,13 +4,13 @@
 
 Find your next neighborhood collaboration using cultural evidence. Sidecar is a Qloo Agentic Hackathon project for independent bookstores and cultural businesses researching local partners.
 
-**Try the [public walkthrough](https://sidecar-qloo.onrender.com/)** and choose **Or explore a complete example**. It uses fictional businesses and never substitutes for live provider results. Free hosting may take about a minute to wake after inactivity.
+**Try [Sidecar live](https://sidecar-qloo.onrender.com/)** with three cultural references and a city. The separate **Or explore a complete example** walkthrough uses fictional businesses. Free hosting may take about a minute to wake after inactivity; live lookups can also take several seconds.
 
-**Current state (October 6, 2026):** local live Qloo discovery verified on three fixed briefs, with paired model comparisons and proposal generation. Exclusions reuse evidence, and a changed cultural reference refreshes discovery. Live tests exposed category and geographic limitations, so no recommendation-quality advantage is claimed. The public host still serves the illustrative walkthrough; live public deployment, owner feedback, demo video and final submission remain pending. See [live findings](docs/live-results-2026-10-06.md).
+**Current state (October 6, 2026):** public live Qloo resolution, discovery, evidence inspection, proposal editing/export and exclusion revision verified on Render Free at `2e54ca6`. Three fixed local briefs and paired model comparisons are also recorded. Tests exposed category and geographic limitations, so no recommendation-quality advantage is claimed. Owner feedback, final demo video, current mobile verification and final submission remain pending. See [live findings](docs/live-results-2026-10-06.md).
 
-![Sidecar illustrative walkthrough](docs/assets/preview.jpg)
+![Sidecar public live collaboration proposal](docs/assets/public-live-proposal.png)
 
-*Illustrative example with fictional businesses. Local live results are documented separately.*
+*A proposed Palomino Coffee collaboration generated from live Qloo evidence. Partner interest, costs and availability remain unverified.*
 
 ## Try it locally
 

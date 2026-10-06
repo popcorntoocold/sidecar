@@ -1,6 +1,6 @@
 # Sidecar submission working draft
 
-This is a preparation document, not a submitted entry. Rewrite claims after live integration and evaluation. Public source: https://github.com/popcorntoocold/sidecar (MIT). Public illustrative walkthrough: https://sidecar-qloo.onrender.com/ . The hosted app has no live provider credentials yet.
+This is a preparation document, not a submitted entry. Public source: https://github.com/popcorntoocold/sidecar (MIT). Public live app: https://sidecar-qloo.onrender.com/ . The hosted discovery, evidence, editable proposal/export and exclusion revision were verified October 6 at commit `2e54ca6`. The current Devpost story is maintained in [devpost-story.md](devpost-story.md).
 
 ## Name and pitch
 
@@ -14,7 +14,7 @@ Independent businesses can have complementary audiences without an obvious conne
 
 ## Product
 
-Sidecar begins with a business's city, collaboration objective, and cultural references. Its proposed live workflow resolves the references with Qloo, discovers nearby partners, gathers cultural evidence, and drafts a collaboration brief. Owners can inspect sources, compare candidates, reject a partner and revise the shortlist.
+Sidecar begins with a business's city, collaboration objective, and cultural references. Its live workflow resolves the references with Qloo, discovers nearby partners, gathers cultural evidence, and drafts a collaboration brief. Owners can inspect sources, compare candidates, reject a partner and revise the shortlist.
 
 The local live workflow has now been exercised with event credentials on three fixed briefs. Paired model comparisons, proposals and exclusion revisions have been recorded, including failed attempts. Changing a cultural reference refreshed discovery. The public app still offers a separate fictional walkthrough. Category suitability and surrounding-area matches remain material limitations; no quality advantage is claimed. See the [October 6 live report](live-results-2026-10-06.md).
 
@@ -48,7 +48,8 @@ React/TypeScript interface, Node server, typed input validation, server-owned to
 - [x] Three local paired comparisons validated, with failed attempts retained.
 - [ ] Independent owner feedback completed.
 - [x] Public illustrative walkthrough deployed and tested anonymously.
-- [ ] Public live Qloo workflow deployed and verified.
+- [x] Public live Qloo workflow deployed and verified on desktop.
+- [ ] Current mobile workflow verified at a confirmed mobile viewport.
 - [x] Repository published with MIT license detected.
 - [ ] Final screenshots and honest description added to Devpost.
 - [ ] User reviews and submits the final entry.
